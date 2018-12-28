@@ -7,9 +7,9 @@
 import { management } from 'ui/management';
 import routes from 'ui/routes';
 
-import 'plugins/webitel_reporting/views/management/reportingSection';
+import 'plugins/webitel_reporting/views/management/jobs';
 import 'plugins/webitel_reporting/views/management/emailSection';
-import 'plugins/webitel_reporting/views/management/job';
+// import 'plugins/webitel_reporting/views/management/job';
 
 routes.defaults(/\/management/, {
     resolve: {

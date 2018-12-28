@@ -17,7 +17,8 @@ export default (server) => {
         path: '/api/reporting/v1/jobs',
         handler(request, reply) {
             elasticsearch.search({
-                index: getIndexName(server, request)
+                index: getIndexName(server, request),
+                ignore: [ 404 ]
             }, reply);
         }
     });

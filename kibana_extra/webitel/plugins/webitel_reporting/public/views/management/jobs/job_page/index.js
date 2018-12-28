@@ -1,0 +1,1 @@
+export {JobPage} from './job_page';

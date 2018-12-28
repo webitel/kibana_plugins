@@ -5,12 +5,22 @@ export class JobManager {
         this.baseUrl = chrome.addBasePath(`/api/reporting/v1/jobs`);
     }
 
-    async create() {
+    async create(attribute) {
+        attribute.name = attribute.id;
+        delete attribute.id;
+        return await this.httpAgent
+            .post(`${this.baseUrl}`, attribute)
+            .then(response => transformRecord(response.data))
+    }
+
+    async update(jobId, attribute) {
 
     }
 
-    async get() {
-
+    async getJob(id) {
+        return await this.httpAgent
+            .get(`${this.baseUrl}/${id}`)
+            .then(response => transformRecord(response.data));
     }
 
     async getJobs() {
@@ -25,8 +35,10 @@ export class JobManager {
             .then(response => transformRecord(response.data))
     }
 
-    async remove() {
-
+    async remove(jobId) {
+        return await this.httpAgent
+            .delete(`${this.baseUrl}/${jobId}`)
+            .then(response => transformRecord(response.data))
     }
 }
 
