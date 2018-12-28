@@ -5,8 +5,8 @@ ENV WEBITEL_MAJOR 3.11
 ENV WEBITEL_REPO_BASE https://github.com/webitel
 ENV KIBANA_VERSION 6.5.4
 
-COPY kibana/build/default/kibana-6.5.4-linux-x86_64 /
-COPY kibana.yml /config/
+COPY kibana/build/default/kibana-6.5.4-linux-x86_64 /kibana
+COPY kibana.yml /kibana/config/
 COPY entrypoint.sh /
 
 ENV NODE_TLS_REJECT_UNAUTHORIZED 0

@@ -12,7 +12,6 @@ cd ../kibana_extra/webitel
 yarn install
 
 cd ..
-ls -la ../kibana/build/
 cp -r webitel ../kibana/build/default/kibana-6.5.4-linux-x86_64/plugins/
 
 exit 0
