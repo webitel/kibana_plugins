@@ -7,6 +7,7 @@
     "version": "6.5.4",
     "templateVersion": "1.0.0"
   },
+  "license": "MIT",
   "scripts": {
     "preinstall": "node ../../kibana/preinstall_check",
     "kbn": "node ../../kibana/scripts/kbn",
@@ -17,6 +18,7 @@
     "build": "plugin-helpers build"
   },
   "devDependencies": {
+    "@kbn/dev-utils": "link:../../kibana/packages/kbn-dev-utils",
     "@elastic/eslint-config-kibana": "link:../../kibana/packages/eslint-config-kibana",
     "@elastic/eslint-import-resolver-kibana": "link:../../kibana/packages/kbn-eslint-import-resolver-kibana",
     "@kbn/plugin-helpers": "link:../../kibana/packages/kbn-plugin-helpers",
@@ -32,6 +34,10 @@
     "expect.js": "^0.3.1"
   },
   "dependencies": {
+    "@kbn/babel-preset": "link:../../kibana/packages/kbn-babel-preset",
+    "@kbn/datemath": "link:../../kibana/packages/kbn-datemath",
+    "@kbn/i18n": "link:../../kibana/packages/kbn-i18n",
+    "@kbn/ui-framework": "link:../../kibana/packages/kbn-ui-framework",
     "async": "^2.6.1",
     "boom": "3.1.1",
     "cron-parser": "^2.7.3",
@@ -45,5 +51,8 @@
     "nodemailer-smtp-pool": "^2.8.3",
     "react-select": "^2.1.2",
     "request": "^2.88.0"
+  },
+  "engines": {
+    "yarn": "^1.6.0"
   }
 }
