@@ -3,7 +3,7 @@ import React, {Component, Fragment} from 'react';
 
 
 import {
-    EuiButton,
+    EuiButtonEmpty,
     EuiFlexGroup,
     EuiFlexItem,
     // @ts-ignore
@@ -21,6 +21,10 @@ import {
 
 import { toastNotifications } from 'ui/notify';
 
+import { openFlyout } from 'ui/flyout';
+
+import { EmailSettingsView } from '../components/email_view'
+
 export class JobsGridPage extends Component {
     constructor(props) {
         super(props);
@@ -29,6 +33,7 @@ export class JobsGridPage extends Component {
             loading: true,
             destroyJobId: null,
             selectedSpace: null,
+            emailConfiguration: null,
             error: null,
         };
         this.closeDestroyModal = this.closeDestroyModal.bind(this);
@@ -38,6 +43,10 @@ export class JobsGridPage extends Component {
 
     componentDidMount() {
         this.loadGrid()
+    }
+
+    componentWillUnmount() {
+        this.closeEmailConfiguration();
     }
 
     closeDestroyModal() {
@@ -161,16 +170,62 @@ export class JobsGridPage extends Component {
         ];
     }
 
-    getPrimaryActionButton() {
+    openEmailConfiguration() {
+        const {emailConfigurationManager} = this.props;
+
+        const emailConfiguration = openFlyout(
+            <EmailSettingsView
+                emailConfigurationManager={emailConfigurationManager}
+                close={this.closeEmailConfiguration.bind(this)}
+            />,
+            {
+                'data-test-subj': 'reportingPanel',
+                closeButtonAriaLabel: 'Close configuration',
+            }
+        );
+
+        this.setState({emailConfiguration})
+    }
+
+    closeEmailConfiguration() {
+        if (this.state.emailConfiguration) {
+            this.state.emailConfiguration.close();
+            this.setState({emailConfiguration: null})
+        }
+    }
+
+    getPrimaryActionsButton() {
         return (
-            <EuiButton
-                fill
-                onClick={() => {
-                    window.location.hash = `#/management/kibana/reporting/new`;
-                }}
-            >
-                Create job
-            </EuiButton>
+            <Fragment>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                            size="s"
+                            iconType="infraApp"
+                            onClick={this.openEmailConfiguration.bind(this)}
+                        >
+                            Email configuration
+                        </EuiButtonEmpty>
+                    </EuiFlexItem>
+
+                    <EuiFlexItem grow={false}>
+
+                        <EuiButtonEmpty
+                            size="s"
+                            iconType="createAdvancedJob"
+                            onClick={() => {
+                                window.location.hash = `#/management/kibana/reporting/new`;
+                            }}
+                        >
+                            New job
+                        </EuiButtonEmpty>
+                    </EuiFlexItem>
+                </EuiFlexGroup>
+
+
+
+
+            </Fragment>
         );
     }
 
@@ -183,7 +238,7 @@ export class JobsGridPage extends Component {
                             <h1>Reporting jobs</h1>
                         </EuiText>
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
+                    <EuiFlexItem grow={false}>{this.getPrimaryActionsButton()}</EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size={'xl'} />
 

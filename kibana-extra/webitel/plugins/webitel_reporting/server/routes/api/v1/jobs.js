@@ -6,7 +6,7 @@
 
 const indexName = '.reporting';
 const typeName = 'reporting';
-import { JobManager } from '../../../../lib/job_manager'
+import {JobManager} from '../../../../lib/job_manager'
 
 export default (server) => {
     const elasticsearch = server.plugins.elasticsearch.getCluster('admin').getClient();
@@ -18,7 +18,7 @@ export default (server) => {
         handler(request, reply) {
             elasticsearch.search({
                 index: getIndexName(server, request),
-                ignore: [ 404 ]
+                ignore: [404]
             }, reply);
         }
     });
@@ -37,29 +37,29 @@ export default (server) => {
     });
 
     server.route({
-      method: 'PUT',
-      path: '/api/reporting/v1/jobs/{name}',
-      handler(request, reply) {
-        const name = request.params.name;
-        const {vis} = request.payload;
-        elasticsearch.update({
-          index: getIndexName(server, request),
-          type: typeName,
-          id: name,
-          refresh: "true",
-          body: {
-            doc: {
-              vis: vis || []
-            }
-          }
-        }, (err, res) => {
-          if (err)
-            return reply(err);
-          jobManager.reload();
-          return reply(null, res)
-        });
+        method: 'PUT',
+        path: '/api/reporting/v1/jobs/{name}',
+        handler(request, reply) {
+            const name = request.params.name;
+            const {vis} = request.payload;
+            elasticsearch.update({
+                index: getIndexName(server, request),
+                type: typeName,
+                id: name,
+                refresh: "true",
+                body: {
+                    doc: {
+                        vis: vis || []
+                    }
+                }
+            }, (err, res) => {
+                if (err)
+                    return reply(err);
+                jobManager.reload();
+                return reply(null, res)
+            });
 
-      }
+        }
     });
 
 
@@ -74,10 +74,10 @@ export default (server) => {
                 type: typeName,
                 id: name
             }, (err, res) => {
-              if (err)
-                return reply(err);
-              jobManager.reload();
-              return reply(null, res)
+                if (err)
+                    return reply(err);
+                jobManager.reload();
+                return reply(null, res)
             });
 
         }
@@ -109,10 +109,10 @@ export default (server) => {
                     text
                 }
             }, (err, res) => {
-              if (err)
-                return reply(err);
-              jobManager.reload();
-              return reply(null, res)
+                if (err)
+                    return reply(err);
+                jobManager.reload();
+                return reply(null, res)
             });
         },
         config: {
@@ -129,38 +129,39 @@ export default (server) => {
     });
 
     server.route({
-      method: 'GET',
-      path: '/api/reporting/v1/email',
-      handler(request, reply) {
-        elasticsearch.get({
-          index: getIndexName(server, request, '.email'),
-          type: 'emailConfig',
-          id: 'settings'
-        }, reply);
+        method: 'GET',
+        path: '/api/reporting/v1/email',
+        handler(request, reply) {
+            elasticsearch.get({
+                index: getIndexName(server, request, '.email'),
+                ignore: [404],
+                type: 'emailConfig',
+                id: 'settings'
+            }, reply);
 
-      }
+        }
     });
 
     server.route({
-      method: 'POST',
-      path: '/api/reporting/v1/email',
-      handler(request, reply) {
-        const {host, auth, from, port, secure} = request.payload;
-        elasticsearch.index({
-          index: getIndexName(server, request, '.email'),
-          type: 'emailConfig',
-          id: 'settings',
-          refresh: "true",
-          body: {
-            host,
-            auth,
-            from,
-            port,
-            secure
-          }
-        }, reply);
+        method: 'POST',
+        path: '/api/reporting/v1/email',
+        handler(request, reply) {
+            const {host, auth, from, port, secure} = request.payload;
+            elasticsearch.index({
+                index: getIndexName(server, request, '.email'),
+                type: 'emailConfig',
+                id: 'settings',
+                refresh: "true",
+                body: {
+                    host,
+                    auth,
+                    from,
+                    port,
+                    secure
+                }
+            }, reply);
 
-      }
+        }
     });
 }
 

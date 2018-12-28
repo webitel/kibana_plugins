@@ -136,7 +136,7 @@ export class JobPage extends Component {
         const {job} = this.state;
 
         if (!job.id || !job.cron || !job.dateInterval || !job.timezone || !job.emails
-            || !job.subject || !job.text) {
+            || !job.subject ) {
             return false
         }
         return true
@@ -285,7 +285,6 @@ export class JobPage extends Component {
                                 resize="vertical"
                                 rows={5}
                                 value={this.state.job.text || ""}
-                                isInvalid={!this.state.job.text}
                                 onChange={(e) => this.onChange(e)}
                                 aria-required
                             />

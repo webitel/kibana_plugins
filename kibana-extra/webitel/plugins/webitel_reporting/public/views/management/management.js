@@ -29,6 +29,7 @@ routes.defaults(/\/management/, {
                 url: '#/management/kibana/reporting'
             })
         },
+        /*
         emailManagementSection: function (Private) {
           const kibanaManagementSection = management.getSection('kibana');
           kibanaManagementSection.deregister('email');
@@ -39,5 +40,6 @@ routes.defaults(/\/management/, {
             url: '#/management/kibana/email'
           });
         }
+        */
     }
 });

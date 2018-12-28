@@ -8,6 +8,7 @@ import { JobsGridPage } from './jobs_grid'
 import { JobPage } from './job_page'
 import template from './template.html'
 import {JobManager} from '../../../lib/job_manager'
+import {EmailConfigurationManager} from '../../../lib/email_manager'
 
 const manageJobsReactRoot = "manageJobsReactRoot";
 
@@ -17,9 +18,10 @@ routes.when('/management/kibana/reporting', {
         $scope.$$postDigest(() => {
             const domNode = document.getElementById(manageJobsReactRoot);
             const jobManager = new JobManager($http, chrome);
+            const emailConfigurationManager = new EmailConfigurationManager($http, chrome);
 
             render(
-                <JobsGridPage jobsManager={jobManager}/>,
+                <JobsGridPage jobsManager={jobManager} emailConfigurationManager={emailConfigurationManager}/>,
                 domNode
             );
 
