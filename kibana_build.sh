@@ -8,8 +8,8 @@ yarn kbn bootstrap
 node scripts/build --skip-os-packages --skip-archives --no-oss --release
 
 
-cd ../kibana_extra/webitel
-yarn install
+cd ../kibana-extra/webitel
+yarn kbn bootstrap
 
 cd ..
 cp -r webitel ../kibana/build/default/kibana-6.5.4-linux-x86_64/plugins/

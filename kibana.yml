@@ -117,7 +117,7 @@ xpack.security.enabled: false
 #xpack.reporting.queue.pollInterval: 300000
 
 #console.enabled: false
-#xpack.monitoring.enabled: false
+xpack.monitoring.enabled: false
 #xpack.ml.enabled: false
 #xpack.logstash.enabled: false
 #xpack.xpack_main.telemetry.enabled: false
