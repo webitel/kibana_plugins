@@ -1,4 +1,5 @@
 #!/bin/bash
+export PATH="/kibana/bin/:$PATH"
 set -e
 
 echo 'Webitel Kibana '$KIBANA_VERSION
