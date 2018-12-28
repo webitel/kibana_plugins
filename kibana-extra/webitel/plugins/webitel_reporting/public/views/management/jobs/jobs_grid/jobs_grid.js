@@ -14,6 +14,9 @@ import {
     EuiPageContent,
     EuiSpacer,
     EuiText,
+    EuiConfirmModal,
+    EuiOverlayMask,
+    EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
 import { toastNotifications } from 'ui/notify';
@@ -24,14 +27,25 @@ export class JobsGridPage extends Component {
         this.state = {
             jobs: [],
             loading: true,
-            showConfirmDeleteModal: false,
+            destroyJobId: null,
             selectedSpace: null,
             error: null,
         };
+        this.closeDestroyModal = this.closeDestroyModal.bind(this);
+        this.showDestroyModal = this.showDestroyModal.bind(this);
+        this.removeJobConfirm = this.removeJobConfirm.bind(this);
     }
 
     componentDidMount() {
         this.loadGrid()
+    }
+
+    closeDestroyModal() {
+        this.setState({ destroyJobId: null });
+    }
+
+    showDestroyModal({id}) {
+        this.setState({ destroyJobId: id });
     }
 
     loadGrid = () => {
@@ -67,15 +81,23 @@ export class JobsGridPage extends Component {
         window.location.hash = `#/management/kibana/reporting/${encodeURIComponent(id)}/edit`;
     };
 
-    onRemoveJobClick({id}) {
+    removeJobConfirm() {
         const { jobsManager } = this.props;
 
+        if (!this.state.destroyJobId) {
+            return;
+        }
+
         jobsManager
-            .remove(id)
+            .remove(this.state.destroyJobId)
             .then(() => {
+                this.setState({
+                    destroyJobId: null
+                });
+
                 this.loadGrid();
 
-                const message = `Deleted "${id}" job.`;
+                const message = `Deleted "${this.state.destroyJobId}" job.`;
 
                 toastNotifications.addSuccess(message);
             })
@@ -129,7 +151,7 @@ export class JobsGridPage extends Component {
                     {
                         name: 'Remove',
                         description: 'Remove this job.',
-                        onClick: ( job => this.onRemoveJobClick(job)),
+                        onClick: ( job => this.showDestroyModal(job)),
                         type: 'icon',
                         icon: 'trash',
                         color: 'danger',
@@ -184,10 +206,32 @@ export class JobsGridPage extends Component {
     }
 
     render() {
+        let destroyModal;
+
+        if (this.state.destroyJobId) {
+            destroyModal = (
+                <EuiOverlayMask>
+                    <EuiConfirmModal
+                        title="Do this destructive thing"
+                        onCancel={this.closeDestroyModal}
+                        onConfirm={this.removeJobConfirm}
+                        cancelButtonText="No, don't do it"
+                        confirmButtonText="Yes, do it"
+                        buttonColor="danger"
+                        defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+                    >
+                        <p>You&rsquo;re about to destroy job {this.state.destroyJobId}.</p>
+                        <p>Are you sure you want to do this?</p>
+                    </EuiConfirmModal>
+                </EuiOverlayMask>
+            );
+        }
+
         return (
             <EuiPage restrictWidth>
                 <EuiPageBody>
                     <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
+                    {destroyModal}
                 </EuiPageBody>
             </EuiPage>
         )

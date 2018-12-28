@@ -14,7 +14,8 @@ export class JobManager {
     }
 
     async update(jobId, attribute) {
-
+        attribute.id = jobId;
+        return await this.create(attribute);
     }
 
     async getJob(id) {
@@ -43,6 +44,8 @@ export class JobManager {
 }
 
 function transform(data) {
+    if (!data || data.status === 404)
+        return []
     return data.hits.hits.map(transformRecord)
 }
 

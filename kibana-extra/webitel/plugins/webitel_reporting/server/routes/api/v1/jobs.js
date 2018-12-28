@@ -49,7 +49,7 @@ export default (server) => {
           refresh: "true",
           body: {
             doc: {
-              vis: vis
+              vis: vis || []
             }
           }
         }, (err, res) => {
@@ -104,7 +104,7 @@ export default (server) => {
                     dateInterval,
                     timezone,
                     emails,
-                    vis,
+                    vis: vis || [],
                     subject,
                     text
                 }

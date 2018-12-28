@@ -1,4 +1,3 @@
-import {get} from 'lodash';
 import React, {Component, Fragment} from 'react';
 
 import {timezones} from '../../../../lib/timezones'
@@ -22,9 +21,10 @@ import {
     EuiSelect,
     EuiComboBox,
     EuiTextArea,
+    EuiBasicTable,
 } from '@elastic/eui';
 
-import { toastNotifications } from 'ui/notify';
+import {toastNotifications} from 'ui/notify';
 
 export class JobPage extends Component {
     constructor(props) {
@@ -34,7 +34,7 @@ export class JobPage extends Component {
             isInvalidEmail: true,
             job: {},
         };
-        this.quickRanges = this.props.quickRanges.map( (i, key) => {
+        this.quickRanges = this.props.quickRanges.map((i, key) => {
             return {
                 text: i.display,
                 value: key
@@ -43,6 +43,15 @@ export class JobPage extends Component {
         this.timezones = timezones;
     }
 
+    getJobDateIntervalValue = (id) => {
+        for (let interval of this.quickRanges) {
+            if (interval.text === id) {
+                return interval.value
+            }
+        }
+        return null
+    };
+
     componentDidMount() {
         const {jobId, jobsManager} = this.props;
 
@@ -50,13 +59,14 @@ export class JobPage extends Component {
             jobsManager
                 .getJob(jobId)
                 .then(job => {
+                    job.dateInterval = this.getJobDateIntervalValue(job.dateInterval.display);
                     this.setState({
                         job,
                         isLoading: false,
                     });
                 })
                 .catch(error => {
-                    const { message = '' } = error.data || {};
+                    const {message = ''} = error.data || {};
 
                     toastNotifications.addDanger(`Error loading space: ${message}`);
                     this.backToSpacesList();
@@ -78,33 +88,42 @@ export class JobPage extends Component {
     };
 
     onChange(e) {
-        const { job } = this.state;
+        const {job} = this.state;
         job[e.target.name] = e.target.value;
         this.setState({job})
     }
 
     saveJob() {
-        const { job } = this.state;
-        const { jobId, jobsManager, quickRanges } = this.props;
+        const {job} = this.state;
+        const {jobId, jobsManager, quickRanges} = this.props;
 
         if (!this.isValid()) {
             return;
         }
 
-        if (jobId) {
 
-        } else {
-            job.dateInterval = quickRanges[job.dateInterval];
+        job.dateInterval = quickRanges[job.dateInterval];
+        if (jobId) {
             jobsManager
-                .create(job)
-                .then(result => {
-                    debugger
+                .update(jobId, job)
+                .then(() => {
+                    toastNotifications.addSuccess(`'${job.name}' was updated`);
+                    this.backToJobsList();
                 })
                 .catch(error => {
-                    const { message = '' } = error.data || {};
-
-                    toastNotifications.addDanger(`Error loading space: ${message}`);
-                    debugger
+                    const {message = ''} = error.data || {};
+                    toastNotifications.addDanger(`Error update job: ${message}`);
+                })
+        } else {
+            jobsManager
+                .create(job)
+                .then(() => {
+                    toastNotifications.addSuccess(`'${job.name}' was created`);
+                    this.backToJobsList();
+                })
+                .catch(error => {
+                    const {message = ''} = error.data || {};
+                    toastNotifications.addDanger(`Error create job: ${message}`);
                 })
         }
     }
@@ -129,7 +148,7 @@ export class JobPage extends Component {
         return (
             <EuiFlexGroup responsive={false}>
                 <EuiFlexItem grow={false}>
-                    <EuiButton fill onClick={this.saveJob.bind(this)} isDisabled={!this.isValid()} >
+                    <EuiButton fill onClick={this.saveJob.bind(this)} isDisabled={!this.isValid()}>
                         {saveText}
                     </EuiButton>
                 </EuiFlexItem>
@@ -138,67 +157,101 @@ export class JobPage extends Component {
                         Cancel
                     </EuiButtonEmpty>
                 </EuiFlexItem>
-                <EuiFlexItem grow={true} />
+                <EuiFlexItem grow={true}/>
             </EuiFlexGroup>
         );
     };
 
-    getForm() {
+    getVisColumns = () => {
+        return [
+            {
+                field: 'name',
+                name: 'Name',
+                sortable: true,
+            }
+        ]
+    }
+
+    getReportingVisualize() {
+        const {job} = this.state;
+        const {jobId} = this.props;
+        if (!jobId)
+            return null;
+
         return (
             <EuiFlexGroup>
                 <EuiFlexItem>
+                    <EuiBasicTable
+                        items={job.vis}
+                        columns={this.getVisColumns()}
+                    />
+                </EuiFlexItem>
+            </EuiFlexGroup>
+        )
+    }
 
-                    <div  >
-                        <EuiFormRow
-                            label="Name"
-                        >
-                            <EuiFieldText
-                                id="id"
-                                name="id"
-                                value={this.state.job.id || ""}
-                                isInvalid={!this.state.job.id}
-                                onChange={(e) => this.onChange(e) }
-                                aria-required
-                            />
-                        </EuiFormRow>
-                        <EuiFormRow
-                            label="Crontab (Example: 1 */1 * * *)"
-                        >
-                            <EuiFieldText
-                                id="cron"
-                                name="cron"
-                                value={this.state.job.cron || ""}
-                                isInvalid={!this.state.job.cron}
-                                onChange={(e) => this.onChange(e) }
-                                aria-required
-                            />
-                        </EuiFormRow>
-                        <EuiFormRow
-                            label="Report interval"
-                        >
-                            <EuiSelect
-                                id="dateInterval"
-                                name="dateInterval"
-                                hasNoInitialSelection={true}
-                                options={this.quickRanges}
-                                value={this.state.job.dateInterval}
-                                isInvalid={!this.state.job.dateInterval}
-                                onChange={ e => this.onChange(e) }
-                            />
-                        </EuiFormRow>
-                        <EuiFormRow
-                            label="Timezone"
-                        >
-                            <EuiSelect
-                                id="timezone"
-                                name="timezone"
-                                hasNoInitialSelection={true}
-                                options={this.timezones}
-                                value={this.state.job.timezone}
-                                isInvalid={!this.state.job.timezone}
-                                onChange={ e => this.onChange(e) }
-                            />
-                        </EuiFormRow>
+    getForm() {
+        return (
+            <Fragment>
+                <EuiFlexGroup>
+                    <EuiFlexItem>
+                        <div>
+                            <EuiFormRow
+                                label="Name"
+                            >
+                                <EuiFieldText
+                                    id="id"
+                                    name="id"
+                                    value={this.state.job.id || ""}
+                                    isInvalid={!this.state.job.id}
+                                    disabled={this.props.jobId}
+                                    onChange={(e) => this.onChange(e)}
+                                    aria-required
+                                />
+                            </EuiFormRow>
+                            <EuiFormRow
+                                label="Crontab (Example: 1 */1 * * *)"
+                            >
+                                <EuiFieldText
+                                    id="cron"
+                                    name="cron"
+                                    value={this.state.job.cron || ""}
+                                    isInvalid={!this.state.job.cron}
+                                    onChange={(e) => this.onChange(e)}
+                                    aria-required
+                                />
+                            </EuiFormRow>
+                            <EuiFormRow
+                                label="Report interval"
+                            >
+                                <EuiSelect
+                                    id="dateInterval"
+                                    name="dateInterval"
+                                    hasNoInitialSelection={true}
+                                    options={this.quickRanges}
+                                    value={this.state.job.dateInterval}
+                                    isInvalid={!this.state.job.dateInterval}
+                                    onChange={e => this.onChange(e)}
+                                />
+                            </EuiFormRow>
+                            <EuiFormRow
+                                label="Timezone"
+                            >
+                                <EuiSelect
+                                    id="timezone"
+                                    name="timezone"
+                                    hasNoInitialSelection={true}
+                                    options={this.timezones}
+                                    value={this.state.job.timezone}
+                                    isInvalid={!this.state.job.timezone}
+                                    onChange={e => this.onChange(e)}
+                                />
+                            </EuiFormRow>
+                        </div>
+
+                    </EuiFlexItem>
+
+                    <EuiFlexItem>
                         <EuiFormRow
                             label="Email(s)"
                         >
@@ -207,7 +260,7 @@ export class JobPage extends Component {
                                 name="emails"
                                 value={this.state.job.emails || ""}
                                 isInvalid={!this.state.job.emails}
-                                onChange={(e) => this.onChange(e) }
+                                onChange={(e) => this.onChange(e)}
                                 aria-required
                             />
                         </EuiFormRow>
@@ -219,7 +272,7 @@ export class JobPage extends Component {
                                 name="subject"
                                 value={this.state.job.subject || ""}
                                 isInvalid={!this.state.job.subject}
-                                onChange={(e) => this.onChange(e) }
+                                onChange={(e) => this.onChange(e)}
                                 aria-required
                             />
                         </EuiFormRow>
@@ -233,22 +286,14 @@ export class JobPage extends Component {
                                 rows={5}
                                 value={this.state.job.text || ""}
                                 isInvalid={!this.state.job.text}
-                                onChange={(e) => this.onChange(e) }
+                                onChange={(e) => this.onChange(e)}
                                 aria-required
                             />
                         </EuiFormRow>
-
-
-                    </div>
-
-                </EuiFlexItem>
-
-                <EuiFlexItem>
-                    TODO grid vis
-                </EuiFlexItem>
-
-            </EuiFlexGroup>
-
+                    </EuiFlexItem>
+                </EuiFlexGroup>
+                {this.getReportingVisualize()}
+            </Fragment>
         )
     }
 
@@ -261,7 +306,7 @@ export class JobPage extends Component {
                     <EuiPageContent>
                         <EuiPageContentBody>{content}</EuiPageContentBody>
 
-                        <EuiSpacer />
+                        <EuiSpacer/>
                         {this.getFormButtons()}
                     </EuiPageContent>
                 </EuiPageBody>

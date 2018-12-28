@@ -100,7 +100,7 @@ export class ReportViewComponent extends Component {
                 name: 'Selected',
                 hideForMobile: false,
                 render: (row) => {
-                    return <EuiCheckbox id={makeId()} onChange={(e) => this.onSelect(row, e.target.checked)} checked={this.isSelectedVis(row.vis)}/>
+                    return <EuiCheckbox id={makeId()} onChange={(e) => this.onSelect(row, e.target.checked)} checked={this.isSelectedVis(row.vis || [])}/>
                 },
             },
             {
