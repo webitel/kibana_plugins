@@ -1,7 +1,4 @@
-import { get } from 'lodash';
 import React, {Component, Fragment} from 'react';
-
-
 import {
     EuiButtonEmpty,
     EuiFlexGroup,
@@ -20,9 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { toastNotifications } from 'ui/notify';
-
 import { openFlyout } from 'ui/flyout';
-
 import { EmailSettingsView } from '../components/email_view'
 
 export class JobsGridPage extends Component {

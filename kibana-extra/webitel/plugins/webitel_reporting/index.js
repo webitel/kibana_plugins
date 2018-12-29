@@ -11,9 +11,6 @@ export const webitel_reporting = (kibana) => {
             managementSections: ['plugins/webitel_reporting/views/management/management'],
             navbarExtensions: [
                 'plugins/webitel_reporting/controls/visualize'
-            ],
-            inspectorViews: [
-              'plugins/webitel_reporting/spy_report/spy_report'
             ]
         },
         config(Joi) {
