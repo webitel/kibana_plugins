@@ -8,6 +8,9 @@ const indexName = '.reporting';
 const typeName = 'reporting';
 import {JobManager} from '../../../../lib/job_manager'
 
+import {validateCron} from '../../../../lib/validate_cron_format'
+const Boom = require('boom');
+
 export default (server) => {
     const elasticsearch = server.plugins.elasticsearch.getCluster('admin').getClient();
     const jobManager = new JobManager(server);
@@ -92,6 +95,10 @@ export default (server) => {
                 throw `Loggin`;
 
             const {name, cron, dateInterval, emails, vis, subject, text, timezone} = request.payload;
+
+            if (!validateCron(cron)) {
+                return reply(Boom.badRequest(`Unable to parse cron expression ${cron}`));
+            }
 
             elasticsearch.index({
                 index: getIndexName(server, request),

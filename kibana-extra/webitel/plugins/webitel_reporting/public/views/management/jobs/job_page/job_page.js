@@ -26,6 +26,10 @@ import {
 
 import {toastNotifications} from 'ui/notify';
 
+const validateCron = (cronFormat = '') => {
+    return /^(\*|([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])|\*\/([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])) (\*|([0-9]|1[0-9]|2[0-3])|\*\/([0-9]|1[0-9]|2[0-3])) (\*|([1-9]|1[0-9]|2[0-9]|3[0-1])|\*\/([1-9]|1[0-9]|2[0-9]|3[0-1])) (\*|([1-9]|1[0-2])|\*\/([1-9]|1[0-2])) (\*|([0-6])|\*\/([0-6]))$/.test(cronFormat)
+};
+
 export class JobPage extends Component {
     constructor(props) {
         super(props);
@@ -100,13 +104,14 @@ export class JobPage extends Component {
             return;
         }
 
+        const copy = Object.assign({}, job);
+        copy.dateInterval = quickRanges[job.dateInterval];
 
-        job.dateInterval = quickRanges[job.dateInterval];
         if (jobId) {
             jobsManager
-                .update(jobId, job)
-                .then(() => {
-                    toastNotifications.addSuccess(`'${job.name}' was updated`);
+                .update(jobId, copy)
+                .then(({id}) => {
+                    toastNotifications.addSuccess(`'${id}' was updated`);
                     this.backToJobsList();
                 })
                 .catch(error => {
@@ -115,9 +120,9 @@ export class JobPage extends Component {
                 })
         } else {
             jobsManager
-                .create(job)
-                .then(() => {
-                    toastNotifications.addSuccess(`'${job.name}' was created`);
+                .create(copy)
+                .then(({id}) => {
+                    toastNotifications.addSuccess(`'${id}' was created`);
                     this.backToJobsList();
                 })
                 .catch(error => {
@@ -134,7 +139,7 @@ export class JobPage extends Component {
     isValid() {
         const {job} = this.state;
 
-        if (!job.id || !job.cron || !job.dateInterval || !job.timezone || !job.emails
+        if (!job.id || !validateCron(job.cron) || !job.dateInterval || !job.timezone || !job.emails
             || !job.subject ) {
             return false
         }
@@ -255,7 +260,7 @@ export class JobPage extends Component {
                                     id="cron"
                                     name="cron"
                                     value={this.state.job.cron || ""}
-                                    isInvalid={!this.state.job.cron}
+                                    isInvalid={!validateCron(this.state.job.cron)}
                                     onChange={(e) => this.onChange(e)}
                                     aria-required
                                 />

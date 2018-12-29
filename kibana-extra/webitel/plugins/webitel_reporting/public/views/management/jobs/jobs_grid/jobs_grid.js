@@ -94,14 +94,14 @@ export class JobsGridPage extends Component {
 
         jobsManager
             .remove(this.state.destroyJobId)
-            .then(() => {
+            .then(({id}) => {
                 this.setState({
                     destroyJobId: null
                 });
 
                 this.loadGrid();
 
-                const message = `Deleted "${this.state.destroyJobId}" job.`;
+                const message = `Deleted "${id}" job.`;
 
                 toastNotifications.addSuccess(message);
             })
