@@ -167,8 +167,43 @@ export class JobPage extends Component {
                 field: 'name',
                 name: 'Name',
                 sortable: true,
-            }
+            },
+            {
+                name: 'Actions',
+                actions: [
+                    {
+                        name: 'Edit',
+                        description: 'Edit this visualize.',
+                        onClick: (vis => this.openEditVis(vis)),
+                        type: 'icon',
+                        icon: 'pencil',
+                        color: 'primary',
+                    },
+                    {
+                        name: 'Remove',
+                        description: 'Remove this visualize from job.',
+                        onClick: ( vis => this.removeVisFromJob(vis)),
+                        type: 'icon',
+                        icon: 'trash',
+                        color: 'danger',
+                    }
+                ],
+            },
         ]
+    };
+
+    openEditVis(vis) {
+        //TODO check changed data
+        const { savedVisualizations } = this.props;
+        window.location.hash = savedVisualizations.urlFor(vis.id);
+    }
+
+    removeVisFromJob({id}) {
+        const {job} = this.state;
+        if (job.vis instanceof Array) {
+            job.vis = job.vis.filter(v => v.id !== id);
+            this.setState({job})
+        }
     }
 
     getReportingVisualize() {

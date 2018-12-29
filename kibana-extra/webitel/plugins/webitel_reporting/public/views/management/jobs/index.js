@@ -60,7 +60,7 @@ routes.when('/management/kibana/reporting/new', {
 
 routes.when('/management/kibana/reporting/:jobId/edit', {
     template,
-    controller($scope, $http, config, chrome, $route) {
+    controller($scope, $http, config, chrome, $route, savedVisualizations) {
         $scope.$$postDigest(() => {
             const domNode = document.getElementById(manageJobsReactRoot);
             const jobManager = new JobManager($http, chrome);
@@ -68,6 +68,7 @@ routes.when('/management/kibana/reporting/:jobId/edit', {
             render(
                 <JobPage
                     jobId={jobId}
+                    savedVisualizations={savedVisualizations}
                     quickRanges={config.get('timepicker:quickRanges')}
                     jobsManager={jobManager}
                 />,
