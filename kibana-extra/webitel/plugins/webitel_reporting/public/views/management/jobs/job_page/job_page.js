@@ -11,7 +11,7 @@ import {
     EuiForm,
     EuiFormRow,
     EuiHorizontalRule,
-    EuiLoadingSpinner,
+    EuiLoadingChart,
     EuiPage,
     EuiPageBody,
     EuiPageContent,
@@ -78,12 +78,11 @@ export class JobPage extends Component {
 
     getLoadingIndicator = () => {
         return (
-            <div>
-                <EuiLoadingSpinner size={'xl'}/>{' '}
-                <EuiTitle>
-                    <h1>Loading...</h1>
-                </EuiTitle>
-            </div>
+            <EuiFlexGroup justifyContent="spaceAround">
+                <EuiFlexItem grow={false}>
+                    <EuiLoadingChart size="xl"/>
+                </EuiFlexItem>
+            </EuiFlexGroup>
         );
     };
 
@@ -181,6 +180,11 @@ export class JobPage extends Component {
         return (
             <EuiFlexGroup>
                 <EuiFlexItem>
+                    <h1>
+                        <EuiTitle size="m">
+                            <h1>Visualize</h1>
+                        </EuiTitle>
+                    </h1>
                     <EuiBasicTable
                         items={job.vis}
                         columns={this.getVisColumns()}

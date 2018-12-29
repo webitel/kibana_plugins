@@ -249,7 +249,7 @@ export class EmailSettingsView extends Component {
                 <EuiFlexItem grow={true}/>
             </EuiFlexGroup>
         );
-    }
+    };
 
     closeConfiguration() {
         const {close} = this.props;
