@@ -5,6 +5,8 @@
 "use strict";
 import { resolve } from 'path';
 
+import proxySearchScroll from './lib/init_proxy_search_scroll'
+
 export const exports = (kibana) => {
     return new kibana.Plugin({
         id: 'exports',
@@ -22,7 +24,7 @@ export const exports = (kibana) => {
             }).default()
         },
         init (server) {
-            const config = server.config();
+            proxySearchScroll(server)
         }
     })
 }
