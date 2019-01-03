@@ -18,12 +18,16 @@ git clone https://github.com/fbaligand/kibana-enhanced-table.git
 cd kibana-enhanced-table
 yarn install
 cd ..
-cp -r kibana-enhanced-table ../kibana/build/default/kibana-6.5.4-linux-x86_64/plugins/
+mv kibana-enhanced-table ../kibana/build/default/kibana-6.5.4-linux-x86_64/plugins/enhanced-table
 
-git clone https://github.com/datasweet/kibana-datasweet-formula.git
-cd kibana-datasweet-formula
+cd datasweet-formula
 yarn install
 cd ..
-cp -r kibana-datasweet-formula ../kibana/build/default/kibana-6.5.4-linux-x86_64/plugins/
+mv datasweet-formula ../kibana/build/default/kibana-6.5.4-linux-x86_64/plugins/datasweet-formula
+
+cd kibana-time-plugin
+bower install
+cd ..
+mv kibana-time-plugin ../kibana/build/default/kibana-6.5.4-linux-x86_64/plugins/kibana-time-plugin
 
 exit 0
