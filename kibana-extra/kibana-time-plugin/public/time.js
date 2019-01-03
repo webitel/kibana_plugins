@@ -20,7 +20,7 @@ function TimeVisProvider(Private) {
   return VisFactory.createAngularVisualization({
     name: 'time',
     title: 'Time widget',
-    icon: 'fa-clock-o',
+    icon: 'clock',
     description: 'Add time inputs to your dashboards.',
     category: CATEGORY.OTHER,
     visConfig: {
