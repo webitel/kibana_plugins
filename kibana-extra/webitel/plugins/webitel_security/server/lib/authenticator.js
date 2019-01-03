@@ -84,23 +84,19 @@ class Authenticator {
         const existingSession = await this._session.get(request);
         if (existingSession) {
             if (!this._cache.has(existingSession.token)) {
-                console.log("REINVITE");
                 try {
                     const user = await this._service.whoAMI(existingSession.token, existingSession.key);
                     this._cache.set(existingSession.token, user);
+                    this._server.log(['authenticate', 'debug'], `Refresh user ${user.getId()} token`);
                 } catch (e) {
                     console.error("--------------------------");
                     console.error(e);
                     this._session.clear(request);
                     throw e
                 }
-            } else {
-                console.log("FROM CACHE")
             }
-            // console.log(this._cache.get(existingSession.token));
 
             request.headers['x-domain'] = this._cache.get(existingSession.token).getDomain();
-            // console.error(request.headers['x-domain']);
 
             authenticationResult = AuthenticationResult.succeeded(existingSession)
         } else {
