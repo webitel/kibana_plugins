@@ -52,11 +52,14 @@ export default class SpacesClient {
         });
     }
 
-    //TODO
     async get(id) {
         const savedObject = await this.callWithRequestSavedObjectRepository.get('space', id);
-        console.log('TODO SpacesClient');
-        return this.transformSavedObjectToSpace(savedObject);
+        const space =  this.transformSavedObjectToSpace(savedObject);
+        if (id !== "default" && !~get(space, 'acl.config.r', []).indexOf(this._user.getRole())) {
+            throw Boom.notFound(`Unauthorized to read spaces ${id}`);
+        }
+
+        return space;
     }
 
     async create(space) {
