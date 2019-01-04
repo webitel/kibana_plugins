@@ -1,8 +1,11 @@
 import {AuthenticationResult} from './authentication_result'
 import AuthClient from './authClient'
+import { includes } from 'lodash';
 
 import {Session} from './session'
 import LRU from "lru-cache";
+
+import {URL} from 'url'
 
 function assertRequest(request) {
     if (!request || typeof request !== 'object') {
@@ -80,17 +83,16 @@ class Authenticator {
         assertRequest(request);
         let authenticationResult;
 
-        const isSystemApiRequest = this._server.plugins.kibana.systemApi.isSystemApiRequest(request);
+        // const isSystemApiRequest = this._server.plugins.kibana.systemApi.isSystemApiRequest(request);
         const existingSession = await this._session.get(request);
         if (existingSession) {
             if (!this._cache.has(existingSession.token)) {
                 try {
                     const user = await this._service.whoAMI(existingSession.token, existingSession.key);
-                    this._cache.set(existingSession.token, user);
+                    await this._cache.set(existingSession.token, user);
                     this._server.log(['authenticate', 'debug'], `Refresh user ${user.getId()} token`);
                 } catch (e) {
-                    console.error("--------------------------");
-                    console.error(e);
+                    this._server.log(['authenticate', 'error'], `Should redirect: ${e.message}`);
                     this._session.clear(request);
                     throw e
                 }
@@ -98,7 +100,31 @@ class Authenticator {
 
             request.headers['x-domain'] = this._cache.get(existingSession.token).getDomain();
 
-            authenticationResult = AuthenticationResult.succeeded(existingSession)
+            if (shouldRedirect(request)) {
+                authenticationResult = AuthenticationResult.redirectTo(`${this._options.basePath}${request.url.pathname}`)
+            } else {
+                authenticationResult = AuthenticationResult.succeeded(existingSession)
+            }
+        } else if (shouldRedirect(request)) {
+            const {x_key, access_token} = request.query;
+            try {
+                const user = await this._service.whoAMI(access_token, x_key);
+                const session = user.getSession();
+                await this._session.set(
+                    request,
+                    session
+                );
+                await this._cache.set(access_token, user);
+                request.headers['x-domain'] = user.getDomain();
+
+                this._server.log(['authenticate', 'debug'], `Refresh user ${user.getId()} token`);
+            } catch (e) {
+                this._server.log(['authenticate', 'error'], `Should redirect: ${e.message}`);
+                this._session.clear(request);
+                throw e
+            }
+
+            authenticationResult = AuthenticationResult.redirectTo(`${this._options.basePath}${request.url.pathname}`)
         } else {
             const nextURL = encodeURIComponent(`${this._options.basePath}${request.url.path}`);
             authenticationResult = AuthenticationResult.redirectTo(
@@ -147,4 +173,8 @@ export async function initAuthenticator(server) {
     // console.log("----------------------------------------------");
 
 
+}
+
+export function shouldRedirect(request) {
+    return includes(request.headers.accept, 'html') && request.query.x_key && request.query.access_token;
 }
