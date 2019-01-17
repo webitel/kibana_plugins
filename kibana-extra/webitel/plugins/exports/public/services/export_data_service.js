@@ -13,21 +13,40 @@ const async = require('async');
 
 import { toastNotifications } from 'ui/notify';
 
-module.service('webitelExportDataService', (es, webitelRecords) => {
+module.service('webitelExportDataService', (es, webitelRecords, $rootScope) => {
     let isProcess = false;
-    let data = [];
     let fsApi = null;
 
     webitelRecords.then(api => {
         fsApi = api;
     });
 
+    function setError(err) {
+        console.error(err);
+        isProcess = false;
+        $rootScope.$emit(`webitel-export-data-finish`) //TODO fire error
+    }
+
+    function setSuccess() {
+        isProcess = false;
+        $rootScope.$emit(`webitel-export-data-finish`)
+    }
+
+    function setStart() {
+        isProcess = true;
+        $rootScope.$emit(`webitel-export-data-start`)
+    }
+
+    function isWorking() {
+        return isProcess;
+    }
+
     function parseTimeStamp (timestamp) {
-        var d = new Date(timestamp);
+        const d = new Date(timestamp);
         return `=DATE(${d.getFullYear()},${d.getMonth() + 1},${d.getDate()})+TIME(${d.getHours()},${d.getMinutes()},${d.getSeconds()})`
     }
 
-    var status = {
+    const status = {
         data: {
             total: 0,
             load: 0
@@ -36,7 +55,10 @@ module.service('webitelExportDataService', (es, webitelRecords) => {
     };
 
     function getStatus() {
-        return status;
+        return {
+            ...status,
+            running: isProcess
+        };
     }
 
     function scrollData(scrollId, cb) {
@@ -48,19 +70,16 @@ module.service('webitelExportDataService', (es, webitelRecords) => {
         }, (err, res) => {
             if (err) {
                 toastNotifications.addDanger(`Scroll data error: ${err.message}`);
-                isProcess = false;
+                setError(err);
+                return;
             }
 
             return cb(err, res);
         })
     }
 
-    function deleteScroll(scroll) {
-
-    }
-
-    var tableToExcel = function(table){
-        var fullTemplate = "";
+    const tableToExcel = function(table){
+        let fullTemplate = "";
         fullTemplate += `<?xml version="1.0"?>
 <?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
@@ -140,7 +159,7 @@ module.service('webitelExportDataService', (es, webitelRecords) => {
 </Workbook>
 `;
 
-        var blob = new Blob([fullTemplate], {
+        const blob = new Blob([fullTemplate], {
             // https://github.com/faisalman/simple-excel-js/blob/master/src/simple-excel.js
             type: "application/vnd.ms-excel"
         });
@@ -150,14 +169,13 @@ module.service('webitelExportDataService', (es, webitelRecords) => {
     const CSV_SEPARATOR = ';';
 
     function tableToCsv(table) {
-
-        var blob = new Blob([table], {
+        const blob = new Blob([table], {
             type: "text/csv"
         });
         fileSaver.saveAs(blob, `${new Date().toLocaleDateString()}.csv`);
     }
 
-    var EXPORT_FN = {
+    const EXPORT_FN = {
         excel: function (scroll, params) {
             var scrollId = scroll._scroll_id;
             var text = '';
@@ -178,9 +196,8 @@ module.service('webitelExportDataService', (es, webitelRecords) => {
 
             function draw(err, res) {
                 if (err) {
-                    console.error(err);
                     toastNotifications.addDanger(`Get data error: ${err.message}`);
-                    isProcess = false;
+                    setError(err);
                     return;
                 }
 
@@ -192,7 +209,7 @@ module.service('webitelExportDataService', (es, webitelRecords) => {
 
                         col.forEach(c => {
                             if (~dateCol.indexOf(c) && v.fields.hasOwnProperty(c)) {
-                                text += `<Cell ss:StyleID="s63" ss:Formula="${parseTimeStamp(v.fields[c].pop())}"><Data ss:Type="DateTime"></Data></Cell>`;
+                                text += `<Cell ss:StyleID="s63" ss:Formula="${parseTimeStamp(v.fields[c][0])}"><Data ss:Type="DateTime"></Data></Cell>`;
                             } else {
                                 text += `<Cell><Data ss:Type="String">${v.fields.hasOwnProperty(c) ? v.fields[c][0] : '-' }</Data></Cell>`;
                             }
@@ -202,13 +219,13 @@ module.service('webitelExportDataService', (es, webitelRecords) => {
                     });
 
                     if (rowsCount >= res.hits.total) {
-                        isProcess = false;
+                        setSuccess();
                         tableToExcel(text, 'export.xls');
                     } else {
                         scrollData(scrollId, draw);
                     }
                 } catch (e) {
-                    isProcess = false;
+                    setError(e);
                     toastNotifications.addDanger(`Error: ${e.message}`);
                 }
 
@@ -227,9 +244,8 @@ module.service('webitelExportDataService', (es, webitelRecords) => {
 
             function draw(err, res) {
                 if (err) {
-                    console.error(err);
                     toastNotifications.addDanger(`Get data error: ${err.message}`);
-                    isProcess = false;
+                    setError(err);
                     return;
                 }
 
@@ -240,7 +256,7 @@ module.service('webitelExportDataService', (es, webitelRecords) => {
                         rowsCount++;
                         col.forEach(c => {
                             if (~dateCol.indexOf(c) && v.fields.hasOwnProperty(c)) {
-                                text += new Date(v.fields[c].pop()).toLocaleString().replace(new RegExp(CSV_SEPARATOR, 'g'), ',');
+                                text += new Date(v.fields[c][0]).toLocaleString().replace(new RegExp(CSV_SEPARATOR, 'g'), ',');
                             } else {
                                 text += v.fields.hasOwnProperty(c) ? v.fields[c][0] : '-';
                             }
@@ -249,13 +265,13 @@ module.service('webitelExportDataService', (es, webitelRecords) => {
                     });
 
                     if (rowsCount >= res.hits.total) {
-                        isProcess = false;
+                        setSuccess();
                         tableToCsv(text);
                     } else {
                         scrollData(scrollId, draw);
                     }
                 } catch (e) {
-                    isProcess = false;
+                    setError(e);
                     toastNotifications.addDanger(`Error: ${e.message}`);
                 }
 
@@ -295,7 +311,7 @@ module.service('webitelExportDataService', (es, webitelRecords) => {
             function onData(err, res) {
                 if (err) {
                     toastNotifications.addDanger(`Fetch data error: ${err.message}`);
-                    isProcess = false;
+                    setError(err);
                     return;
                 }
 
@@ -304,12 +320,12 @@ module.service('webitelExportDataService', (es, webitelRecords) => {
                 loadFiles(res.hits.hits, e => {
                     if (e) {
                         toastNotifications.addDanger(`Load file error: ${e.message}`);
-                        isProcess = false;
+                        setError(e);
                         return;
                     }
 
                     if (rowsCount >= res.hits.total) {
-                        isProcess = false;
+                        setSuccess();
                         zip.generateAsync({type:"blob"}).then(function(content) {
                             fileSaver.saveAs(content, `${new Date().toLocaleDateString()}.zip`);
                         });
@@ -323,85 +339,69 @@ module.service('webitelExportDataService', (es, webitelRecords) => {
         }
     };
 
+    const FILES_FIELDS = ["recordings.hash", "recordings.content-type", "recordings.name", "variables.uuid"];
 
-    function process(searchSource, params, cb) {
-        if (isProcess) return cb(new Error('Process export running'));
-
-        if (!params)
-            return cb(new Error('Bad params'));
-
-        if (!EXPORT_FN.hasOwnProperty(params.to)) {
-            return cb(new Error('Bad type export to ' + params.to || ''  ));
+    function start({searchRequest, fields}, format, {docvalueFields}) {
+        if (isWorking()) {
+            setError(new Error("Process export is working"));
+            return;
         }
-        isProcess = true;
-        data = [];
-        searchSource._flatten()
-            .then(query => {
-                params.dateColumns = _.clone(query.body.docvalue_fields);
 
-                function getFilter(query) {
-                    var f = _.clone(query);
-                    if (params.to === "files") {
-                        try {
-                            f.bool.must.push({
-                                exists: {"field": "recordings"}
-                            })
-                        } catch (e) {
-                            console.error(e);
-                        }
-                    }
-                    return f;
-                }
+        if (!EXPORT_FN.hasOwnProperty(format)) {
+            setError(new Error(`Bad type export to ${format}`));
+            return;
+        }
 
-                function getBody(query) {
-                    if (params.to === "files") {
-                        return {
-                            "_source": "recordings",
-                            query: getFilter(query.body.query)
-                        }
-                    } else {
-                        return {
-                            docvalue_fields: query.body.docvalue_fields.concat(params.columns),
-                            //stored_fields: query.body.docvalue_fields.concat(params.columns),
-                            // _source: params.columns,
-                            query: getFilter(query.body.query),
-                            sort: _.clone(query.body.sort)
-                        }
-                    }
+        setStart();
+
+        const body = _.clone(searchRequest.body);
+
+        let docFields = [];
+        if (docvalueFields instanceof Array) {
+            docFields = docvalueFields.map(i => {
+                if (i instanceof Object) {
+                    return i.field
                 }
-                es.search({
-                    index: query.index.title,
-                    scroll: '5m',
-                    size: 10000,
-                    body: getBody(query)
-                }, (err, res) => {
-                    if (err) {
-                        isProcess = false;
-                        return cb(err);
-                    }
-                    if (query.index.timeFieldName) {
-                        params.columns.unshift(query.index.timeFieldName);
-                        params.topFieldDate = true;
-                    }
-                    try {
-                        EXPORT_FN[params.to](res, params);
-                    } catch (e) {
-                        isProcess = false;
-                        toastNotifications.addDanger(`Export error: ${e.message}`);
-                    }
-                    return cb(null);
-                });
+                return i;
             })
-            .catch(e => {
-                console.error(e);
-                toastNotifications.addDanger(`Error: ${e.message}`);
-                isProcess = false;
-                return cb(e)
+        }
+
+        let fields_ = [].concat(format === 'files' ? FILES_FIELDS : fields, docFields);
+        body.docvalue_fields = fields_.filter((item, pos) => {
+            return fields_.indexOf(item) === pos;
+        });
+        body._source = false;
+        if (format === 'files') {
+            body.query.bool.must.push({
+                exists: {"field": "recordings"}
             });
+
+            body._source = {
+                includes: ["recordings"]
+            };
+        }
+
+        es.search({
+            index: searchRequest.index,
+            scroll: '5m',
+            size: 10000,
+            body
+        }, (err, res) => {
+            if (err) {
+                toastNotifications.addDanger(`Export error: ${err.message}`);
+                setError(err);
+                return;
+            }
+            EXPORT_FN[format](res, {columns: fields, dateColumns: docFields});
+        })
     }
 
     return {
-        export: process,
-        getStatus: getStatus
+        start: start,
+        getStatus: getStatus,
+        isWorking: isWorking,
+        subscribe: (eventName, cb) => {
+            return $rootScope.$on(eventName, cb);
+        }
     }
 });

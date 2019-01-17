@@ -14,8 +14,8 @@ export const exports = (kibana) => {
         configPrefix: 'webitel.exports',
         publicDir: resolve(__dirname, 'public'),
         uiExports: {
-            navbarExtensions: [
-                'plugins/exports/controls/discover'
+            shareContextMenuExtensions: [
+                'plugins/exports/share_context_menu/register_export'
             ]
         },
         config(Joi) {

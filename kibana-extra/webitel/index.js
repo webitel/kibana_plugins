@@ -20,6 +20,6 @@ module.exports = function (kibana) {
         members(kibana),
         recordings(kibana),
         exports(kibana),
-        calls(kibana),
+        calls(kibana)
     ]
 };
