@@ -62,7 +62,9 @@ class Authenticator {
 
     async login(request) {
         const {username, password} = request.payload;
-        const user = await this._service.loginByCredentials(username, password);
+        const {code} = request.query;
+
+        const user = await this._service.loginByCredentials(username, password, code);
 
         const session = user.getSession();
         await this._session.set(

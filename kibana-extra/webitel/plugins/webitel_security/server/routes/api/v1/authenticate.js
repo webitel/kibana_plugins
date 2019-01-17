@@ -26,6 +26,12 @@ module.exports = (server) => {
 
               return reply.continue({ credentials });
           } catch (err) {
+              if (err.status === 301) {
+                  return reply({
+                      statusCode: 301,
+                      message: "Enter your code"
+                  }).code(301)
+              }
               return reply(wrapError(err));
           }
       }

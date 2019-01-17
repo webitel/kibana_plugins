@@ -12,9 +12,16 @@ import {
     EuiFormRow,
     EuiFieldText,
     EuiButton,
+    EuiButtonEmpty,
     EuiPanel,
     EuiCallOut,
     EuiSpacer,
+    EuiOverlayMask,
+    EuiModal,
+    EuiModalHeader,
+    EuiModalHeaderTitle,
+    EuiModalBody,
+    EuiModalFooter,
 } from '@elastic/eui';
 
 
@@ -22,11 +29,26 @@ export class LoginPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            isModalVisible: false,
             isLoading: true,
             isValid: false,
             username: "",
             password: "",
+            code: "",
         }
+    }
+
+    closeModal() {
+        this.setState({ isModalVisible: false, message: '' });
+    }
+
+    showModal() {
+        this.setState({
+            isModalVisible: true,
+            code: '',
+            message: '',
+            isLoading: false
+        });
     }
 
     componentDidMount() {
@@ -52,24 +74,35 @@ export class LoginPage extends Component {
         if (!this.state.username) {
             return;
         }
+        const { username, password } = this.state;
 
+        this.auth(username, password, null);
+    }
+
+    twoFA() {
+        const { username, password, code } = this.state;
+        this.auth(username, password, code);
+    };
+
+    auth(username, password, code) {
         this.setState({
             isLoading: true
         });
-
-
         const { http, window, next } = this.props;
-
-        const { username, password } = this.state;
-
-        http.post('./api/webitel/v1/login', { username, password }).then(
+        http.post('./api/webitel/v1/login' + (code ? `?code=${code}` : ''), { username, password }).then(
             () => (window.location.href = next),
             (error) => {
-                const { statusCode = 500 } = error.data || {};
+                let { statusCode = 500, message } = error.data || {};
 
-                let message = 'Oops! Error. Try again.';
-                if (statusCode === 401) {
+                if (statusCode === 301) {
+                    this.showModal();
+                    return;
+                }
+
+                if (!message && statusCode === 401) {
                     message = 'Invalid username or password. Please try again.';
+                } else if (!message) {
+                    message = 'Oops! Error. Try again.';
                 }
 
                 this.setState({
@@ -79,6 +112,54 @@ export class LoginPage extends Component {
                 });
             }
         );
+    }
+
+    getFormInputCode() {
+        if (this.state.isModalVisible) {
+            return (
+                <EuiOverlayMask>
+                    <EuiModal
+                        onClose={this.closeModal.bind(this)}
+                    >
+                        <EuiModalHeader>
+                            <EuiModalHeaderTitle >
+                                Enter your two factor auth code
+                            </EuiModalHeaderTitle>
+                        </EuiModalHeader>
+
+                        <EuiModalBody>
+                            <EuiFormRow
+                                label="Code"
+                            >
+                                <EuiFieldText id="code"
+                                              name="code"
+                                              value={this.state.code}
+                                              onChange={(e) => this.onChange(e) }
+                                              aria-required />
+                            </EuiFormRow>
+                            {this.renderMessage()}
+                        </EuiModalBody>
+
+                        <EuiModalFooter>
+                            <EuiButtonEmpty
+                                onClick={this.closeModal.bind(this)}
+                            >
+                                Cancel
+                            </EuiButtonEmpty>
+
+                            <EuiButton
+                                onClick={this.twoFA.bind(this)}
+                                isDisabled={!this.state.code}
+                                fill
+                            >
+                                Auth
+                            </EuiButton>
+                        </EuiModalFooter>
+                    </EuiModal>
+                </EuiOverlayMask>
+            )
+        }
+        return null;
     }
 
     renderMessage = () => {
@@ -145,6 +226,7 @@ export class LoginPage extends Component {
                         </EuiPageContentBody>
                     </EuiPageContent>
                 </EuiPageBody>
+                {this.getFormInputCode()}
             </EuiPage>
         )
     }

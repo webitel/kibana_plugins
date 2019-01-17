@@ -35,8 +35,8 @@ export default class AuthClient {
 
     }
 
-    async loginByCredentials(username, password) {
-        const params = await this._client.api('POST', '/login', {username, password});
+    async loginByCredentials(username, password, code) {
+        const params = await this._client.api('POST', '/login' + (code ? `?code=${code}`: ''), {username, password});
 
         return new User(params)
     }
