@@ -3,7 +3,6 @@ import Joi from 'joi';
 
 module.exports = (server) => {
   const baseUrl = server.config().get('webitel.main.engineUri');
-  const webRtcUri = server.config().get('webitel.main.webRtcUri');
 
   server.route({
       method: 'POST',
@@ -45,8 +44,7 @@ module.exports = (server) => {
       return reply({
         statusCode: 200,
         credentials: credentials.whoAMI(),
-        engineUri: baseUrl,
-        webRtcUri: webRtcUri
+        engineUri: baseUrl
       });
     }
   });

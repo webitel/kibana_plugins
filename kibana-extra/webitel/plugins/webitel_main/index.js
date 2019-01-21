@@ -20,10 +20,7 @@ export const webitel_main = (kibana) => {
         config(Joi) {
             return Joi.object({
                 enabled: Joi.boolean().default(true),
-                engineUri: Joi.string().default('http://localhost'),
-                engineAuthUri: Joi.string(),
-                cdrUri: Joi.string().default('http://localhost/cdr'),
-                webRtcUri: Joi.string().default('http://localhost:8082')
+                engineUri: Joi.string().default('http://localhost')
             }).default()
         },
         async init (server) {

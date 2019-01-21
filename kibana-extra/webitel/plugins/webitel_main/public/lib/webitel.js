@@ -20,7 +20,6 @@ define(function (require) {
                         return console.warn('No credentials');
 
                     webitelSession.ws = res.data.engineUri.replace(/http/,'ws');
-                    webitelSession.wsWebRtc = res.data.webRtcUri;
                     webitelSession.hostname = res.data.engineUri;
 
                     var webitel = window.webitel = new Webitel({

@@ -10,7 +10,7 @@ export default class Client {
     _baseUrl = null;
     constructor(server) {
         const config = server.config();
-        this._baseUrl = config.get('webitel.main.engineAuthUri') || config.get('webitel.main.engineUri');
+        this._baseUrl = config.get('webitel.main.engineUri');
 
         this.error = err => {
             server.log(['error', 'webitel_api'], err)

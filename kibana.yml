@@ -127,9 +127,6 @@ xpack.monitoring.enabled: false
 #xpack.watcher.enabled: false
 
 
-webitel.main.cdrUri: "http://10.10.10.25:10023"
 webitel.main.engineUri: "https://pre.webitel.com/engine"
-webitel.main.engineAuthUri: "https://pre.webitel.com/engine"
-webitel.main.webRtcUri: "wss://pre.webitel.com/verto"
 webitel.security.encryptionKey: "cMjwnsfBoUZms7c1m4X2mg80uTSjYTlrtJNEjogpTdDTcU6r43laYWP9IziH4vXd"
 webitel.security.sessionTimeout: 604800000
