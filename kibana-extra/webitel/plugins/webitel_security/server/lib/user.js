@@ -55,7 +55,8 @@ export default class User {
         return {
             ...this.getSession(),
             username: this.getId(),
-            domain: this.getDomain()
+            domain: this.getDomain(),
+            role: this.getRole()
         }
     }
 

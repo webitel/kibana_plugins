@@ -32,7 +32,7 @@ export const webitel_security = (kibana) => new kibana.Plugin({
         }).default();
     },
     uiExports: {
-        // hacks: ['plugins/webitel_security/chrome/readonly'],
+        hacks: ['plugins/webitel_security/chrome/readonly'],
         chromeNavControls: ['plugins/webitel_security/views/logout_button'],
         home: ['plugins/webitel_security/register_feature'],
         managementSections: ['plugins/webitel_security/views/management'],

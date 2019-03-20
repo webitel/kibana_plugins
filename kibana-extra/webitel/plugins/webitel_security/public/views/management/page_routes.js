@@ -16,16 +16,19 @@ const reactRootNodeId = 'manageSpacesACLReactRoot';
 
 routes.when('/management/security_spaces/list', {
     template,
-    controller($scope, $http, chrome, Private, spaceSelectorURL) {
+    controller($scope, $http, chrome, Private, config, spaceSelectorURL) {
         const userProfile = Private(UserProfileProvider);
 
         $scope.$$postDigest(() => {
             const domNode = document.getElementById(reactRootNodeId);
             const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
+            const roleManager = new RoleManager($http, chrome);
 
             render(
                 <SpacesACLGridPage
                     spacesManager={spacesManager}
+                    config={config}
+                    roleManager={roleManager}
                     userProfile={userProfile}
                 />,
                 domNode

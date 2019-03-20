@@ -55,7 +55,7 @@ export default function (plugin, server) {
             await callAdminAsKibanaUser('indices.putTemplate', {
                 name: `kibana_index_template:${index}-*`,
                 body: {
-                    template: index+"-*",
+                    index_patterns: index+"-*",
                     settings: {
                         number_of_shards: 1,
                     },

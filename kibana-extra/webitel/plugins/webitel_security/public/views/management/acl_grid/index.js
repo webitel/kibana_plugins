@@ -3,8 +3,12 @@ import React, {Component, Fragment} from 'react';
 
 import { UnauthorizedPrompt } from '../components/unauthorized_prompt'
 
+import { NavLinksSettingsView } from './nav_links'
+import { openFlyout } from 'ui/flyout';
+
 import {
     EuiButton,
+    EuiButtonEmpty,
     EuiFlexGroup,
     EuiFlexItem,
     // @ts-ignore
@@ -25,7 +29,9 @@ export class SpacesACLGridPage extends Component {
             loading: true,
             showConfirmDeleteModal: false,
             selectedSpace: null,
+            navLinkConfiguration: null,
             error: null,
+            showNavLinkDialog: false
         };
     }
 
@@ -56,6 +62,7 @@ export class SpacesACLGridPage extends Component {
                             <h1>Access control spaces</h1>
                         </EuiText>
                     </EuiFlexItem>
+                    <EuiFlexItem grow={false}>{this.getPrimaryActionsButton()}</EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size={'xl'} />
 
@@ -147,6 +154,47 @@ export class SpacesACLGridPage extends Component {
                     error,
                 });
             });
+    };
+
+    openNavLinksSettings() {
+        const navLinkConfiguration = openFlyout(
+            <NavLinksSettingsView
+                close={this.closeNavLinksSettings.bind(this)}
+                roleManager={this.props.roleManager}
+                config={this.props.config}
+            />,
+            {
+                closeButtonAriaLabel: 'Close configuration',
+            }
+        );
+
+        this.setState({navLinkConfiguration})
+
+    }
+
+    closeNavLinksSettings() {
+        if (this.state.navLinkConfiguration) {
+            this.state.navLinkConfiguration.close();
+            this.setState({navLinkConfiguration: null})
+        }
+    }
+
+    getPrimaryActionsButton() {
+        return (
+            <Fragment>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                            size="s"
+                            iconType="eyeClosed"
+                            onClick={this.openNavLinksSettings.bind(this)}
+                        >
+                            Navigation links configuration
+                        </EuiButtonEmpty>
+                    </EuiFlexItem>
+                </EuiFlexGroup>
+            </Fragment>
+        );
     }
 
     onEditSpaceClick = (space) => {
