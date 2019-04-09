@@ -5,7 +5,7 @@ import { includes } from 'lodash';
 import {Session} from './session'
 import LRU from "lru-cache";
 
-import {URL} from 'url'
+import url from 'url'
 
 function assertRequest(request) {
     if (!request || typeof request !== 'object') {
@@ -101,12 +101,7 @@ class Authenticator {
             }
 
             request.headers['x-domain'] = this._cache.get(existingSession.token).getDomain();
-
-            if (shouldRedirect(request)) {
-                authenticationResult = AuthenticationResult.redirectTo(`${this._options.basePath}${request.url.pathname}`)
-            } else {
-                authenticationResult = AuthenticationResult.succeeded(existingSession)
-            }
+            authenticationResult = AuthenticationResult.succeeded(existingSession)
         } else if (shouldRedirect(request)) {
             const {x_key, access_token} = request.query;
             try {
@@ -120,13 +115,13 @@ class Authenticator {
                 request.headers['x-domain'] = user.getDomain();
 
                 this._server.log(['authenticate', 'debug'], `Refresh user ${user.getId()} token`);
+                authenticationResult = AuthenticationResult.redirectTo(`${this._options.basePath}${request.raw.req.url}`);
+
             } catch (e) {
                 this._server.log(['authenticate', 'error'], `Should redirect: ${e.message}`);
                 this._session.clear(request);
                 throw e
             }
-
-            authenticationResult = AuthenticationResult.redirectTo(`${this._options.basePath}${request.url.pathname}`)
         } else {
             const nextURL = encodeURIComponent(`${this._options.basePath}${request.url.path}`);
             authenticationResult = AuthenticationResult.redirectTo(
