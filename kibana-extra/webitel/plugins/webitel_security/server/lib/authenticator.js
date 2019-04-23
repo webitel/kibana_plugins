@@ -115,7 +115,7 @@ class Authenticator {
                 request.headers['x-domain'] = user.getDomain();
 
                 this._server.log(['authenticate', 'debug'], `Refresh user ${user.getId()} token`);
-                authenticationResult = AuthenticationResult.redirectTo(`${this._options.basePath}${request.raw.req.url}`);
+                authenticationResult = AuthenticationResult.redirectTo(`${this._options.basePath}${request.raw.req.url.split("?").shift()}`);
 
             } catch (e) {
                 this._server.log(['authenticate', 'error'], `Should redirect: ${e.message}`);
