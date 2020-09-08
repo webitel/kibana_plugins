@@ -41,7 +41,7 @@
     "async": "^2.6.1",
     "boom": "3.1.1",
     "cron-parser": "^2.7.3",
-    "hapi-auth-cookie": "6.1.1",
+    "hapi-auth-cookie": "7.0.0",
     "joi": "^14.1.0",
     "jszip": "^3.1.5",
     "jszip-utils": "^0.0.2",
