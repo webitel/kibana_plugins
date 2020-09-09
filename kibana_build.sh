@@ -14,7 +14,7 @@ yarn kbn bootstrap
 cd ..
 cp -r webitel ../kibana/build/default/kibana-6.5.4-linux-x86_64/plugins/
 
-git clone https://github.com/fbaligand/kibana-enhanced-table.git
+git clone --branch v0.9.0 https://github.com/fbaligand/kibana-enhanced-table.git
 cd kibana-enhanced-table
 yarn install
 cd ..
