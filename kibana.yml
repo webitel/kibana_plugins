@@ -130,3 +130,4 @@ xpack.monitoring.enabled: false
 webitel.main.engineUri: "https://pre.webitel.com/engine"
 webitel.security.encryptionKey: "cMjwnsfBoUZms7c1m4X2mg80uTSjYTlrtJNEjogpTdDTcU6r43laYWP9IziH4vXd"
 webitel.security.sessionTimeout: 604800000
+webitel.security.secureCookies: true

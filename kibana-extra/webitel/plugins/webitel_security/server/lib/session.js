@@ -81,7 +81,7 @@ export class Session {
             clearInvalid: true,
             validateFunc: Session._validateCookie,
             isSecure: config.get('webitel.security.secureCookies'),
-            isSameSite: "Lax",
+            isSameSite: false,
             // path: `${config.get('server.basePath')}/`
         });
 
