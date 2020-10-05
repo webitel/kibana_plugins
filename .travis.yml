@@ -13,9 +13,9 @@ before_install:
   - export PATH="$HOME/.yarn/bin:$PATH"
   - npm install -g bower
   - ./kibana_get.sh
-  - ./kibana_build.sh
 
 install:
+  - travis_wait ./kibana_build.sh
   - cp -r kibana-extra/webitel kibana/build/default/kibana-6.5.4-linux-x86_64/plugins/
   - docker login --username=$DOCKER_HUB_USERNAME --password=$DOCKER_HUB_PASSWORD
   - docker build -t $DOCKER_IMAGE_NAME:6.5.4 .
