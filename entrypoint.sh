@@ -21,7 +21,7 @@ if [ "$1" = 'kibana' ]; then
 	fi
 	
 	if [ "$WEBITEL_COOKIES" ]; then
-		sed -ri "s!^(webitel.security.secureCookies:).*!\1 '$WEBITEL_COOKIES'!" /kibana/config/kibana.yml
+		sed -i '/secureCookies/d' /kibana/config/kibana.yml
 	fi
 
 if [ "$ENGINE_AUTH_URL" -o "$ENGINE_AUTH_PORT_10022_TCP" ]; then
